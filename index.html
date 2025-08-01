@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Mithun Raj | Video Editor & Motion Designer Portfolio</title>
+    <meta name="description" content="Portfolio of Mithun Raj, a creative video editor and motion graphic designer from Bengaluru, India, specializing in high-impact edits, YouTube content, and visual storytelling.">
+    <meta name="keywords" content="mithun raj editor, video editor, motion graphics, Belagavi, Bengaluru, alogoyt, content creator, portfolio, video editing">
+    <meta name="author" content="Mithun Raj">
+
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <div class="background-effects">
+        <canvas id="blob-canvas"></canvas>
+    </div>
+
+    <div id="loader"><span class="loader-name">Mithun Raj</span></div>
+
+    <header id="navbar">
+        <nav>
+            <ul>
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="hero">
+        <video id="bg-video" autoplay muted loop playsinline></video>
+        <div class="overlay"></div>
+        <div class="hero-content">
+            <svg id="hero-name" viewBox="0 0 900 150">
+                <text id="hero-name-text" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">Mithun Raj</text>
+            </svg>
+            <h2 class="subtitle">
+                <span class="typed-text"></span>
+            </h2>
+        </div>
+        <div class="scroll-cue"><span></span></div>
+    </main>
+
+    <section id="about" class="hidden">
+        <div class="section-container split-layout">
+            <div class="split-left">
+                <h2 class="section-title">
+                    <svg viewBox="0 0 400 60"><text x="50%" y="50%" dy=".1em" dominant-baseline="middle" text-anchor="middle">About Me</text></svg>
+                </h2>
+                <p>A creative and self-taught video editor with a passion for visual storytelling, based in Bengaluru, India. I have delivered over 100+ high-impact videos with a focus on audience engagement, content pacing, and visual clarity.</p>
+                <p>Adept at optimizing content strategy for digital channels and experienced in leveraging AI tools to enhance editing workflows.</p>
+            </div>
+            <div class="split-right">
+                <div class="isometric-shape-container">
+                    <img src="assets/images/my_pic.jpg" alt="A photo of Mithun Raj">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="hidden">
+        <div class="section-container">
+            <h2 class="section-title">
+                <svg viewBox="0 0 400 60"><text x="50%" y="50%" dy=".1em" dominant-baseline="middle" text-anchor="middle">Portfolio</text></svg>
+            </h2>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="gameplay">Gameplay</button>
+                <button class="filter-btn" data-filter="reels">Reels</button>
+                <button class="filter-btn" data-filter="highlights">Highlights</button>
+            </div>
+            <div class="portfolio-grid">
+                </div>
+            <div class="pagination-container"></div>
+        </div>
+    </section>
+
+    <section id="services" class="hidden">
+        <div class="section-container">
+            <h2 class="section-title">
+                <svg viewBox="0 0 400 60"><text x="50%" y="50%" dy=".1em" dominant-baseline="middle" text-anchor="middle">Services</text></svg>
+            </h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>YouTube Content</h3>
+                    <p>Produced and refined 100+ gameplay videos, boosting watch time by 25% through optimized pacing and audience hooks.</p>
+                </div>
+                <div class="service-card">
+                    <h3>Motion Graphics & VFX</h3>
+                    <p>Proficient in Adobe After Effects, creating custom transitions, audio sync, and engaging visual effects to elevate content.</p>
+                </div>
+                <div class="service-card">
+                    <h3>Short-Form Reels</h3>
+                    <p>Developed 30+ short-form reels, synchronizing animations with trending audio to contribute to a 45% increase in follower growth.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="hidden">
+        <div class="section-container">
+            <h2 class="section-title">
+                <svg viewBox="0 0 500 60"><text x="50%" y="50%" dy=".1em" dominant-baseline="middle" text-anchor="middle">Get In Touch</text></svg>
+            </h2>
+            <form class="contact-form" name="contact" netlify>
+                <div class="form-group">
+                    <input type="text" id="name" name="name" required>
+                    <label for="name">Your Name</label>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="email" name="email" required>
+                    <label for="email">Your Email</label>
+                </div>
+                <div class="form-group">
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                    <label for="message">Your Message</label>
+                </div>
+                <button type="submit" class="send-btn">Send Message</button>
+            </form>
+            <p class="direct-email">Or reach out directly at <a href="mailto:mrmithunraj07@gmail.com">mrmithunraj07@gmail.com</a></p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Mithun Raj. All rights reserved.</p>
+    </footer>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="assets/portfolio-data.js"></script>
+    <script src="assets/script.js"></script>
+</body>
+</html>
