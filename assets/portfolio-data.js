@@ -1,12 +1,12 @@
 // Add the unique ID of your YouTube videos here
 // Add the unique ID of your YouTube videos and assign a category
 const portfolioData = [
-    { videoId: "8fnYAG2HavU", category: "gameplay" },
-    { videoId: "IE1xgnVzlUk", category: "reels" },
-    { videoId: "YUYtFQBfBoM", category: "highlights" },
-    { videoId: "PWomEvP7NKw", category: "gameplay" },
-    { videoId: "kcCB2u-cjLI", category: "reels" },
-    { videoId: "FAujh1hDMJw", category: "highlights" },
-    { videoId: "PWomEvP7NKw", category: "reels" }
+    { videoId: "RokU_kRqSMo", category: "gameplay" },
+    { videoId: "lXaBUPf62N8", category: "reels" },
+    { videoId: "bHgEHmMvZSo", category: "reels" },
+    { videoId: "aTXR33mb_LA", category: "highlights" },
+    { videoId: "L_yUtcL3AGA", category: "highlights" },
+    { videoId: "pgG-whIbYs8", category: "reels" },
+    { videoId: "zcziWhA9ecw", category: "gameplay" },
 ];
 // e.g., for https://www.youtube.com/watch?v=dQw4w9WgXcQ, the ID is dQw4w9WgXcQ
