@@ -1,40 +1,24 @@
-const YOUTUBE_API_KEY = 'AIzaSyDWaRy7eTZqcfSLoRvKugNZ9tcNS5qtGrc';
-let fetchedVideosData = []; 
+let fetchedVideosData = [];
 let currentFilteredVideos = [];
 let currentPage = 1;
 
-const portfolioGrid = document.querySelector('.portfolio-grid');
-const paginationContainer = document.querySelector('.pagination-container');
-
-// This function is now global, so the YouTube API can call it
 function onYouTubeIframeAPIReady() {
     fetchYouTubeVideos();
 }
 
-// Function to check screen size and determine items per page
 function getVideosPerPage() {
-    if (window.innerWidth <= 768) {
-        return 2; // 2 videos per page on mobile
-    } else {
-        return 6; // 6 videos per page on desktop
-    }
+    return window.innerWidth <= 768 ? 2 : 6;
 }
 
 async function fetchYouTubeVideos() {
-    // First, try to get data from the browser's session storage
+    const portfolioGrid = document.querySelector('.portfolio-grid');
+    if (!portfolioGrid) return;
+    const YOUTUBE_API_KEY = 'AIzaSyDWaRy7eTZqcfSLoRvKugNZ9tcNS5qtGrc';
     const cachedData = sessionStorage.getItem('youtube_portfolio_data');
     if (cachedData) {
-        console.log("✅ Using cached data from sessionStorage.");
         fetchedVideosData = JSON.parse(cachedData);
         currentFilteredVideos = fetchedVideosData;
         displayPage(1);
-        return; // Stop the function here and use the cached data
-    }
-
-    // If no cached data, proceed with the API call
-    console.log("ℹ️ No cached data found. Fetching from YouTube API...");
-    if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY === 'PASTE_YOUR_API_KEY_HERE') {
-        portfolioGrid.innerHTML = `<p style="text-align: center; width: 100%; color: #ff5555;">Error: YouTube API Key is missing.<br>Please add it to the top of script.js.</p>`;
         return;
     }
 
@@ -44,63 +28,47 @@ async function fetchYouTubeVideos() {
     try {
         const response = await fetch(url);
         const data = await response.json();
-
-        if (data.error) {
-            console.error("YouTube API Error:", data.error.message);
-            portfolioGrid.innerHTML = `<p style="color: #ff5555;">Error: ${data.error.message}. Check your API Key and Google Cloud settings.</p>`;
-            return;
-        }
+        if (data.error) throw new Error(data.error.message);
         
         fetchedVideosData = data.items.map(apiItem => {
             const localItem = portfolioData.find(local => local.videoId === apiItem.id);
             return { ...apiItem, category: localItem ? localItem.category : 'all' };
         });
 
-        // Save the newly fetched data to session storage for next time
-        console.log("✅ Saving fetched data to sessionStorage.");
         sessionStorage.setItem('youtube_portfolio_data', JSON.stringify(fetchedVideosData));
-        
         currentFilteredVideos = fetchedVideosData;
         displayPage(1);
-
     } catch (error) {
-        console.error('Network error while fetching YouTube data:', error);
-        portfolioGrid.innerHTML = '<p>Error loading portfolio. Please try again later.</p>';
+        console.error('Error fetching YouTube data:', error);
+        if (portfolioGrid) portfolioGrid.innerHTML = `<p>Error loading portfolio grid. Please check API key.</p>`;
     }
 }
 
 function displayPage(page) {
+    const portfolioGrid = document.querySelector('.portfolio-grid');
+    if (!portfolioGrid) return; 
+
     currentPage = page;
     portfolioGrid.innerHTML = '';
-
     const videosPerPage = getVideosPerPage();
-    const startIndex = (page - 1) * videosPerPage;
-    const endIndex = startIndex + videosPerPage;
-    const paginatedItems = currentFilteredVideos.slice(startIndex, endIndex);
+    const paginatedItems = currentFilteredVideos.slice((page - 1) * videosPerPage, page * videosPerPage);
 
     populatePortfolio(paginatedItems);
     setupPaginationControls();
 }
 
 function populatePortfolio(videos) {
+    const portfolioGrid = document.querySelector('.portfolio-grid');
+    if (!portfolioGrid) return;
+    
     videos.forEach(video => {
         const snippet = video.snippet;
         const thumbnail = snippet.thumbnails.high; 
-
         const portfolioItem = document.createElement('div');
         portfolioItem.className = 'portfolio-item';
         portfolioItem.dataset.videoId = video.id;
         portfolioItem.dataset.category = video.category;
-
-        if (thumbnail && thumbnail.width && thumbnail.height) {
-            if (thumbnail.width > thumbnail.height) {
-                portfolioItem.classList.add('horizontal');
-            } else {
-                portfolioItem.classList.add('vertical');
-            }
-        } else {
-             portfolioItem.classList.add('horizontal');
-        }
+        portfolioItem.classList.add(thumbnail && thumbnail.width > thumbnail.height ? 'horizontal' : 'vertical');
 
         portfolioItem.innerHTML = `
             <img src="${thumbnail.url}" alt="${snippet.title}" class="thumbnail">
@@ -113,22 +81,19 @@ function populatePortfolio(videos) {
 }
 
 function setupPaginationControls() {
-    paginationContainer.innerHTML = '';
-    const videosPerPage = getVideosPerPage();
-    const pageCount = Math.ceil(currentFilteredVideos.length / videosPerPage);
+    const paginationContainer = document.querySelector('.pagination-container');
+    if (!paginationContainer) return;
 
+    paginationContainer.innerHTML = '';
+    const pageCount = Math.ceil(currentFilteredVideos.length / getVideosPerPage());
     if (pageCount <= 1) return;
 
     for (let i = 1; i <= pageCount; i++) {
         const button = document.createElement('button');
         button.className = 'pagination-btn';
-        if (i === currentPage) {
-            button.classList.add('active');
-        }
+        if (i === currentPage) button.classList.add('active');
         button.innerText = i;
-        button.addEventListener('click', () => {
-            displayPage(i);
-        });
+        button.addEventListener('click', () => displayPage(i));
         paginationContainer.appendChild(button);
     }
 }
@@ -152,103 +117,75 @@ function playVideoInPlace(element, videoId) {
     });
 }
 
-// All other event listeners and functions that need the DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- LOADER ---
     const loader = document.getElementById('loader');
-    window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 500));
+    if (loader) window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 500));
 
-    // --- CURSOR ---
     const cursorDot = document.querySelector('.cursor-dot');
     const cursorOutline = document.querySelector('.cursor-outline');
-    window.addEventListener('mousemove', (e) => {
-        const { clientX: posX, clientY: posY } = e;
-        cursorDot.style.left = `${posX}px`;
-        cursorDot.style.top = `${posY}px`;
-        cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" });
-    });
+    if (cursorDot && cursorOutline) {
+        window.addEventListener('mousemove', (e) => {
+            const { clientX: posX, clientY: posY } = e;
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+            cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" });
+        });
+    }
 
-    // --- NAVBAR REVEAL ---
     const navbar = document.getElementById('navbar');
     const heroSection = document.getElementById('hero');
-    const navbarObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.intersectionRatio < 0.5) {
-                navbar.classList.add('visible');
-            } else {
-                navbar.classList.remove('visible');
-            }
-        });
-    }, { threshold: [0.5] });
-    navbarObserver.observe(heroSection);
-    
-    // --- HERO & BACKGROUND ANIMATIONS ---
-    const videoElement = document.getElementById('bg-video');
-    const videoSources = ['assets/videos/bg1.mp4', 'assets/videos/bg2.mp4', 'assets/videos/bg3.mp4', 'assets/videos/bg4.mp4'];
-    if(videoElement) {
-        videoElement.src = videoSources[Math.floor(Math.random() * videoSources.length)];
-        videoElement.play().catch(error => console.error("Video autoplay error:", error));
+    if (navbar && heroSection) {
+        const navbarObserver = new IntersectionObserver(entries => {
+            navbar.classList.toggle('visible', entries[0].intersectionRatio < 0.5);
+        }, { threshold: [0.5] });
+        navbarObserver.observe(heroSection);
     }
+    
+    const bgVideoElement = document.getElementById('bg-video');
+    if(bgVideoElement) {
+        const videoSources = ['assets/videos/bg1.mp4', 'assets/videos/bg2.mp4', 'assets/videos/bg3.mp4', 'assets/videos/bg4.mp4'];
+        bgVideoElement.src = videoSources[Math.floor(Math.random() * videoSources.length)];
+    }
+
     const typedTextSpan = document.querySelector('.typed-text');
     if (typedTextSpan) {
         const textArray = ["Video Editor", "Motion Designer", "Content Creator", "Gamer"];
-        const typingDelay = 50, erasingDelay = 30, newTextDelay = 1000;
         let textArrayIndex = 0, charIndex = 0;
         function type() {
             if (charIndex < textArray[textArrayIndex].length) {
                 typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex++);
-                setTimeout(type, typingDelay);
-            } else { setTimeout(erase, newTextDelay); }
+                setTimeout(type, 50);
+            } else { setTimeout(erase, 1000); }
         }
         function erase() {
             if (charIndex > 0) {
                 typedTextSpan.textContent = textArray[textArrayIndex].substring(0, --charIndex);
-                setTimeout(erase, erasingDelay);
-            } else { textArrayIndex = (textArrayIndex + 1) % textArray.length; setTimeout(type, typingDelay + 500); }
+                setTimeout(erase, 30);
+            } else { textArrayIndex = (textArrayIndex + 1) % textArray.length; setTimeout(type, 500); }
         }
         setTimeout(type, 2500);
     }
+    
     const canvas = document.getElementById('blob-canvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         class Blob {
             constructor(color) { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.radius = Math.random() * 200 + 150; this.color = color; this.vx = (Math.random() - 0.5) * 1; this.vy = (Math.random() - 0.5) * 1; }
             update() { this.x += this.vx; this.y += this.vy; if (this.x < -this.radius || this.x > canvas.width + this.radius) this.vx *= -1; if (this.y < -this.radius || this.y > canvas.height + this.radius) this.vy *= -1; }
             draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill(); }
         }
         const blobs = [new Blob('rgba(0, 255, 255, 0.2)'), new Blob('rgba(148, 0, 211, 0.2)')];
-        function animateBlobs() { ctx.clearRect(0, 0, canvas.width, canvas.height); blobs.forEach(b => { b.update(); b.draw(); }); requestAnimationFrame(animateBlobs); }
+        const animateBlobs = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); blobs.forEach(b => { b.update(); b.draw(); }); requestAnimationFrame(animateBlobs); };
         animateBlobs();
         window.addEventListener('resize', () => {
-             canvas.width = window.innerWidth;
-             canvas.height = window.innerHeight;
-             // Refresh portfolio on resize to adjust pagination
-             displayPage(currentPage);
+             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+             if (document.querySelector('.portfolio-grid')) displayPage(currentPage);
         });
     }
 
-    // --- PORTFOLIO FILTER BUTTONS ---
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            const filter = button.dataset.filter;
-            
-            currentFilteredVideos = (filter === 'all')
-                ? fetchedVideosData
-                : fetchedVideosData.filter(video => video.category === filter);
-            
-            displayPage(1);
-        });
-    });
-
-    // --- SCROLL REVEAL FOR SECTIONS ---
-    const hiddenElements = document.querySelectorAll('section.hidden');
-    const sectionObserver = new IntersectionObserver((entries) => {
+    const sectionObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
@@ -256,26 +193,112 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, { rootMargin: "-100px 0px" });
-    hiddenElements.forEach(el => sectionObserver.observe(el));
+    document.querySelectorAll('section.hidden').forEach(el => sectionObserver.observe(el));
     
-    // --- OTHER INTERACTIVE ELEMENTS ---
+    // --- THIS IS THE MISSING CODE FOR SERVICE CARD ANIMATIONS ---
     const serviceCards = document.querySelectorAll('.service-card');
-    serviceCards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            const rotateX = -y / 20; const rotateY = x / 20;
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-            card.style.boxShadow = `0 0 40px -10px ${x > 0 ? 'var(--primary-glow)' : 'var(--secondary-glow)'}`;
+    if (serviceCards.length > 0) {
+        serviceCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                const rotateX = -y / 20; const rotateY = x / 20;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+                card.style.boxShadow = `0 0 40px -10px ${x > 0 ? 'var(--primary-glow)' : 'var(--secondary-glow)'}`;
+            });
+            card.addEventListener('mouseleave', () => { card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)'; card.style.boxShadow = 'none'; });
         });
-        card.addEventListener('mouseleave', () => { card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)'; card.style.boxShadow = 'none'; });
-    });
-    const formInputs = document.querySelectorAll('.form-group input, .form-group textarea');
-    formInputs.forEach(input => {
-        input.addEventListener('blur', () => {
-            if (input.value !== "") input.classList.add('has-value');
-            else input.classList.remove('has-value');
-        });
-    });
+    }
+
+    loadPortfolioIntoIndex();
 });
+
+
+async function loadPortfolioIntoIndex() {
+    const placeholder = document.getElementById('portfolio-placeholder');
+    if (!placeholder) return;
+
+    try {
+        const response = await fetch('portfolio.html');
+        const htmlText = await response.text();
+        const parser = new DOMParser();
+        const portfolioDoc = parser.parseFromString(htmlText, 'text/html');
+        const portfolioSection = portfolioDoc.querySelector('#portfolio');
+
+        if (portfolioSection) {
+            placeholder.replaceWith(portfolioSection);
+            const newPortfolioSection = document.getElementById('portfolio');
+            const sectionObserver = new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting) {
+                    newPortfolioSection.classList.add('visible');
+                    sectionObserver.unobserve(newPortfolioSection);
+                }
+            }, { rootMargin: "-100px 0px" });
+            sectionObserver.observe(newPortfolioSection);
+
+            initializePortfolioScripts();
+        }
+    } catch (error) {
+        console.error("Error loading portfolio content:", error);
+    }
+}
+
+function initializePortfolioScripts() {
+    const showreelVideo = document.getElementById('showreel-video');
+    const playOverlay = document.getElementById('showreel-play-overlay');
+
+    if (showreelVideo) {
+        // --- Logic for Click-to-Play Fallback ---
+        const startVideo = () => {
+            showreelVideo.play().catch(error => {
+                console.error("Playback failed:", error);
+            });
+            if (playOverlay) playOverlay.style.display = 'none';
+        };
+
+        if (playOverlay) {
+            playOverlay.addEventListener('click', startVideo);
+        }
+
+        // --- Intersection Observer to Autoplay on Scroll ---
+        const showreelObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (entry.target.paused) {
+                        const playPromise = entry.target.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log("Autoplay was prevented. Showing play button.");
+                                if (playOverlay) playOverlay.style.display = 'flex';
+                            });
+                        }
+                    }
+                } else {
+                    entry.target.pause();
+                }
+            });
+        }, { 
+            threshold: 0.1 // Triggers when 10% of the video is visible
+        });
+        showreelObserver.observe(showreelVideo);
+    }
+
+    // Initialize YouTube API for the portfolio grid below
+    if (typeof onYouTubeIframeAPIReady === 'function') {
+        onYouTubeIframeAPIReady();
+    }
+
+    // Attach listeners for filter buttons
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            currentFilteredVideos = (button.dataset.filter === 'all')
+                ? fetchedVideosData
+                : fetchedVideosData.filter(video => video.category === button.dataset.filter);
+            displayPage(1);
+        });
+    });
+}

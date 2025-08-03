@@ -366,6 +366,68 @@ section.visible .isometric-shape-container:hover {
    ================================= */
 footer { text-align: center; padding: 40px; background: #000; position: relative; z-index: 10; }
 
+
+.cta-youtube {
+    text-align: center;
+    margin-top: 60px;
+}
+
+.cta-youtube a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 8px;
+    transition: color 0.3s ease-out;
+}
+
+.cta-youtube a span {
+    color: var(--primary-glow);
+    transition: text-shadow 0.3s ease-out;
+}
+
+.cta-youtube a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-glow);
+    box-shadow: 0 0 15px var(--primary-glow);
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cta-youtube a:hover {
+    color: var(--primary-glow);
+}
+
+.cta-youtube a:hover::after {
+    width: 100%;
+}
+
+.cta-youtube a:hover span {
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+/* Styling for the YouTube Showreel */
+.showreel-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 50px auto; /* Add margin-bottom to create space */
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 0 30px -10px var(--secondary-glow);
+    overflow: hidden;
+}
+
+#youtube-showreel-player {
+    /* This creates a responsive 16:9 container */
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+}
 /* =================================
    8. RESPONSIVENESS
    ================================= */
@@ -376,4 +438,150 @@ footer { text-align: center; padding: 40px; background: #000; position: relative
     #navbar nav ul { gap: 15px; justify-content: space-around; padding: 0 10px;}
     #navbar nav a { font-size: 0.8rem; }
     .section-container { padding: 80px 20px; }
+}
+/* --- Portfolio Grid Styling --- */
+.portfolio-grid {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: 1fr; /* Default to 1 column on mobile */
+}
+
+/* This is the media query that makes the grid responsive */
+@media (min-width: 768px) {
+    .portfolio-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns on desktop */
+    }
+}
+
+
+/* === PORTFOLIO SECTION (CORRECTED) === */
+.filter-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 40px; }
+.filter-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px 20px; border-radius: 20px; font-weight: 700; transition: background-color 0.3s, color 0.3s; }
+.filter-btn.active, .filter-btn:hover { background-color: var(--primary-glow); color: var(--dark-bg); }
+
+.portfolio-grid {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: 1fr; /* Default to 1 column on mobile */
+}
+
+.portfolio-item { 
+    position: relative; 
+    overflow: hidden; 
+    border-radius: 10px; 
+    border: 1px solid var(--border-color); 
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out; 
+    display: block; 
+    cursor: pointer;
+}
+.portfolio-item.horizontal { aspect-ratio: 16 / 9; }
+.portfolio-item.vertical { aspect-ratio: 9 / 12; }
+.portfolio-item:hover { transform: scale(1.03); box-shadow: 0 0 20px var(--primary-glow); }
+.portfolio-item .thumbnail { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease-out; }
+.portfolio-item:hover .thumbnail { transform: scale(1.1); }
+.item-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); transition: opacity 0.3s ease-in-out; }
+.item-overlay h3 { color: var(--text-color); font-size: 1.2rem; }
+.play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); width: 80px; height: 80px; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease-out, transform 0.3s ease-out; }
+.portfolio-item:hover .play-icon { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.play-icon::before { content: ''; width: 0; height: 0; border-top: 15px solid transparent; border-bottom: 15px solid transparent; border-left: 25px solid white; margin-left: 5px; }
+.portfolio-item iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+.pagination-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; }
+.pagination-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); width: 40px; height: 40px; border-radius: 50%; font-weight: 700; transition: background-color 0.3s, color 0.3s; }
+.pagination-btn.active, .pagination-btn:hover { background-color: var(--primary-glow); color: var(--dark-bg); }
+
+/* Contact Section */
+.contact-form { max-width: 600px; margin: 0 auto; }
+.form-group { position: relative; margin-bottom: 40px; }
+.form-group input, .form-group textarea { width: 100%; background: transparent; border: none; border-bottom: 2px solid var(--border-color); padding: 10px 0; color: var(--text-color); font-size: 1.1rem; outline: none; }
+.form-group label { position: absolute; top: 10px; left: 0; color: rgba(255,255,255,0.7); pointer-events: none; transition: all 0.3s ease-out; }
+.form-group input:focus + label, .form-group input:valid + label, .form-group textarea:focus + label, .form-group textarea:valid + label { top: -20px; font-size: 0.9rem; color: var(--primary-glow); }
+.form-group input:focus, .form-group textarea:focus { border-bottom-color: var(--primary-glow); box-shadow: 0 5px 15px -10px var(--primary-glow); }
+.send-btn { background: var(--primary-glow); color: var(--dark-bg); border: none; padding: 15px 30px; font-weight: 700; font-size: 1.1rem; border-radius: 5px; width: 100%; transition: box-shadow 0.3s ease-out; }
+.send-btn:hover { box-shadow: 0 0 20px var(--primary-glow); }
+.direct-email { text-align: center; margin-top: 40px; }
+.direct-email a { color: var(--primary-glow); text-decoration: none; }
+
+/* =================================
+   7. FOOTER
+   ================================= */
+footer { text-align: center; padding: 40px; background: #000; position: relative; z-index: 10; }
+
+.cta-youtube { text-align: center; margin-top: 60px; }
+.cta-youtube a { color: var(--text-color); text-decoration: none; font-size: 1.2rem; font-weight: 700; position: relative; padding-bottom: 8px; transition: color 0.3s ease-out; }
+.cta-youtube a span { color: var(--primary-glow); transition: text-shadow 0.3s ease-out; }
+.cta-youtube a::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 2px; background-color: var(--primary-glow); box-shadow: 0 0 15px var(--primary-glow); transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.cta-youtube a:hover { color: var(--primary-glow); }
+.cta-youtube a:hover::after { width: 100%; }
+.cta-youtube a:hover span { text-shadow: 0 0 10px var(--primary-glow); }
+
+/* Styling for the Self-Hosted Showreel Video */
+.showreel-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 50px auto; /* Add margin-bottom to create space */
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 0 30px -10px var(--secondary-glow);
+    overflow: hidden;
+}
+#showreel-video {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+    display: block; /* Removes extra space below video */
+}
+
+/* =================================
+   8. RESPONSIVENESS
+   ================================= */
+@media (max-width: 768px) {
+    .split-layout { flex-direction: column; text-align: center;}
+    .isometric-shape-container { display: none; }
+    .section-title svg { width: 90vw; }
+    #navbar nav ul { gap: 15px; justify-content: space-around; padding: 0 10px;}
+    #navbar nav a { font-size: 0.8rem; }
+    .section-container { padding: 80px 20px; }
+}
+
+/* This media query makes the portfolio grid responsive */
+@media (min-width: 768px) {
+    .portfolio-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns on desktop */
+    }
+}
+/* Styling for the Showreel Play Button Overlay */
+.showreel-container {
+    position: relative; /* This is needed for the overlay positioning */
+}
+
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1;
+    transition: background-color 0.3s ease;
+}
+
+.play-overlay:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.play-overlay svg {
+    width: 80px;
+    height: 80px;
+    color: rgba(255, 255, 255, 0.8);
+    filter: drop-shadow(0 0 10px var(--primary-glow));
+    transition: transform 0.3s ease;
+}
+
+.play-overlay:hover svg {
+    transform: scale(1.1);
 }

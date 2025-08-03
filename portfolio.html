@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Portfolio | Mithun Raj</title>
+    <meta name="description" content="Portfolio of Mithun Raj, a creative video editor and motion graphic designer from Bengaluru, India, specializing in high-impact edits, YouTube content, and visual storytelling.">
+    <meta name="keywords" content="mithun raj editor, video editor, motion graphics, Belagavi, Bengaluru, alogoyt, content creator, portfolio, video editing">
+    <meta name="author" content="Mithun Raj">
+
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <div class="background-effects">
+        <canvas id="blob-canvas"></canvas>
+    </div>
+
+    <div id="loader"><span class="loader-name">Mithun Raj</span></div>
+
+    <header id="navbar" class="visible">
+        <nav>
+            <ul>
+                <li><a href="index.html#hero">Home</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="portfolio.html">Portfolio</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="portfolio">
+            <div class="section-container">
+                <h2 class="section-title">
+                    <svg viewBox="0 0 400 60"><text x="50%" y="50%" dy=".1em" dominant-baseline="middle" text-anchor="middle">Portfolio</text></svg>
+                </h2>
+                <div class="showreel-container">
+    <video id="showreel-video" loop playsinline>
+        <source src="assets/videos/showreel.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="play-overlay" id="showreel-play-overlay">
+        <svg width="100" height="100" viewBox="0 0 24 24"><path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" /></svg>
+    </div>
+</div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="gameplay">Gameplay</button>
+                    <button class="filter-btn" data-filter="reels">Reels</button>
+                    <button class="filter-btn" data-filter="highlights">Highlights</button>
+                </div>
+                <div class="portfolio-grid">
+                    </div>
+                <div class="pagination-container"></div>
+                <div class="cta-youtube">
+    <a href="https://www.youtube.com/@mithunrajedit" target="_blank" rel="noopener noreferrer">
+        Want to see even more? <span>View my complete collection on YouTube.</span>
+    </a>
+</div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Mithun Raj. All rights reserved.</p>
+    </footer>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="assets/portfolio-data.js"></script>
+    <script src="assets/script.js"></script>
+</body>
+</html>
