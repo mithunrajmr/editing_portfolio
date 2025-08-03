@@ -490,6 +490,38 @@ footer { text-align: center; padding: 40px; background: #000; position: relative
 .pagination-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); width: 40px; height: 40px; border-radius: 50%; font-weight: 700; transition: background-color 0.3s, color 0.3s; }
 .pagination-btn.active, .pagination-btn:hover { background-color: var(--primary-glow); color: var(--dark-bg); }
 
+.showreel-youtube-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.showreel-youtube-link a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: inline-flex; /* Use flexbox for alignment */
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    padding: 8px 15px;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.showreel-youtube-link a:hover {
+    color: var(--primary-glow);
+    border-color: var(--border-color);
+    background-color: var(--glass-bg);
+}
+
+.showreel-youtube-link a svg {
+    transition: transform 0.3s ease;
+}
+
+.showreel-youtube-link a:hover svg {
+    transform: scale(1.1);
+}
 /* Contact Section */
 .contact-form { max-width: 600px; margin: 0 auto; }
 .form-group { position: relative; margin-bottom: 40px; }

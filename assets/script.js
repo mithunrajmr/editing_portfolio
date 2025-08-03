@@ -248,40 +248,28 @@ function initializePortfolioScripts() {
     const showreelVideo = document.getElementById('showreel-video');
     const playOverlay = document.getElementById('showreel-play-overlay');
 
-    if (showreelVideo) {
-        // --- Logic for Click-to-Play Fallback ---
-        const startVideo = () => {
-            showreelVideo.play().catch(error => {
-                console.error("Playback failed:", error);
-            });
-            if (playOverlay) playOverlay.style.display = 'none';
-        };
+    if (showreelVideo && playOverlay) {
+        // Show the play button by default when the page loads
+        playOverlay.style.display = 'flex';
 
-        if (playOverlay) {
-            playOverlay.addEventListener('click', startVideo);
-        }
-
-        // --- Intersection Observer to Autoplay on Scroll ---
-        const showreelObserver = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    if (entry.target.paused) {
-                        const playPromise = entry.target.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(error => {
-                                console.log("Autoplay was prevented. Showing play button.");
-                                if (playOverlay) playOverlay.style.display = 'flex';
-                            });
-                        }
-                    }
-                } else {
-                    entry.target.pause();
-                }
-            });
-        }, { 
-            threshold: 0.1 // Triggers when 10% of the video is visible
+        // Toggle play/pause when the video container is clicked
+        showreelVideo.parentElement.addEventListener('click', () => {
+            if (showreelVideo.paused) {
+                showreelVideo.play();
+            } else {
+                showreelVideo.pause();
+            }
         });
-        showreelObserver.observe(showreelVideo);
+
+        // Show overlay when video is paused
+        showreelVideo.addEventListener('pause', () => {
+            playOverlay.style.display = 'flex';
+        });
+
+        // Hide overlay when video is playing
+        showreelVideo.addEventListener('play', () => {
+            playOverlay.style.display = 'none';
+        });
     }
 
     // Initialize YouTube API for the portfolio grid below
