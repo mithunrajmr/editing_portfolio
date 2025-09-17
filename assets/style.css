@@ -65,7 +65,7 @@ a:hover ~ .cursor-outline, button:hover ~ .cursor-outline, .portfolio-item:hover
 /* =================================
    4. LOADER & NAVBAR
    ================================= */
-#loader {
+/* #loader {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: #000; display: flex; justify-content: center; align-items: center;
     z-index: 10000; transition: opacity 1s ease-out, visibility 1s ease-out;
@@ -76,7 +76,53 @@ a:hover ~ .cursor-outline, button:hover ~ .cursor-outline, .portfolio-item:hover
     color: var(--primary-glow); text-shadow: 0 0 10px var(--primary-glow);
     animation: pulse 2s infinite ease-in-out;
 }
-@keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } } */
+/* --- NEW LOADER ANIMATION --- */
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #010103; /* Matches your site's dark background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    transition: opacity 0.8s ease-in-out, visibility 0.8s;
+}
+
+#loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 10vw, 5rem);
+    color: transparent; /* Text is made transparent */
+    
+    /* The gradient that will be revealed through the text */
+    background: linear-gradient(to right, var(--text-color) 50%, #333333 50%);
+    background-size: 200% 100%;
+    
+    /* The magic part: uses the text shape as a mask */
+    -webkit-background-clip: text;
+    background-clip: text;
+    
+    /* Apply the fill animation */
+    animation: fillText 2.5s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+@keyframes fillText {
+    from {
+        background-position: 100%;
+    }
+    to {
+        background-position: 0%;
+    }
+}
 
 #navbar {
     position: fixed; top: 0; left: 0; width: 100%;

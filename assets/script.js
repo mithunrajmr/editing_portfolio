@@ -120,7 +120,7 @@ function playVideoInPlace(element, videoId) {
 document.addEventListener('DOMContentLoaded', () => {
     
     const loader = document.getElementById('loader');
-    if (loader) window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 500));
+    if (loader) window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 2000));
 
     const cursorDot = document.querySelector('.cursor-dot');
     const cursorOutline = document.querySelector('.cursor-outline');
