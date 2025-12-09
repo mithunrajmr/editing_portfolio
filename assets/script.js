@@ -13,40 +13,86 @@ function getVideosPerPage() {
 async function fetchYouTubeVideos() {
     const portfolioGrid = document.querySelector('.portfolio-grid');
     if (!portfolioGrid) return;
+
+    // 1. Separate items
+    const youtubeItems = portfolioData.filter(item => item.type === 'youtube');
+    const imageItems = portfolioData.filter(item => item.type === 'image');
+
+    // 2. Fetch YouTube Data if needed
+    let fetchedYoutubeData = [];
     const YOUTUBE_API_KEY = 'AIzaSyDWaRy7eTZqcfSLoRvKugNZ9tcNS5qtGrc';
-    const cachedData = sessionStorage.getItem('youtube_portfolio_data');
-    if (cachedData) {
-        fetchedVideosData = JSON.parse(cachedData);
-        currentFilteredVideos = fetchedVideosData;
-        displayPage(1);
-        return;
+    const videoIds = youtubeItems.map(item => item.videoId).join(',');
+
+    // Check session storage with "Smart Validation"
+    const cachedData = sessionStorage.getItem('youtube_cache_data');
+    const cachedIds = sessionStorage.getItem('youtube_cache_ids');
+
+    // If cache exists AND the list of videos hasn't changed, use cache
+    if (cachedData && cachedIds === videoIds) {
+        console.log("Using cached YouTube data (Content unchanged).");
+        fetchedYoutubeData = JSON.parse(cachedData);
+    } else if (videoIds.length > 0) {
+        console.log("Video list changed or cache empty. Fetching new data...");
+        const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoIds}&key=${YOUTUBE_API_KEY}`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+
+            // MERGE LOGIC: Iterate over LOCAL items
+            fetchedYoutubeData = youtubeItems.map(localItem => {
+                const apiItem = data.items.find(item => item.id === localItem.videoId);
+                if (apiItem) {
+                    return { ...localItem, snippet: apiItem.snippet };
+                } else {
+                    // Fallback for unlisted/private videos
+                    // console.warn(`Video ${localItem.videoId} not returned by API (likely unlisted). Using fallback.`);
+                    return {
+                        ...localItem,
+                        snippet: {
+                            title: localItem.title || "Video",
+                            thumbnails: { high: { url: `https://img.youtube.com/vi/${localItem.videoId}/maxresdefault.jpg` } }
+                        }
+                    };
+                }
+            });
+
+            // Update Cache AND the ID list used to validate it
+            sessionStorage.setItem('youtube_cache_data', JSON.stringify(fetchedYoutubeData));
+            sessionStorage.setItem('youtube_cache_ids', videoIds);
+        } catch (error) {
+            console.error('Error fetching YouTube data:', error);
+            // Fallback
+            fetchedYoutubeData = youtubeItems.map(item => ({
+                ...item,
+                snippet: {
+                    title: item.title || "Video Name",
+                    thumbnails: { high: { url: `https://img.youtube.com/vi/${item.videoId}/maxresdefault.jpg` } }
+                }
+            }));
+        }
     }
 
-    const videoIds = portfolioData.map(item => item.videoId).join(',');
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoIds}&key=${YOUTUBE_API_KEY}`;
-    
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.error) throw new Error(data.error.message);
-        
-        fetchedVideosData = data.items.map(apiItem => {
-            const localItem = portfolioData.find(local => local.videoId === apiItem.id);
-            return { ...apiItem, category: localItem ? localItem.category : 'all' };
-        });
+    // 3. Prepare Image Data (Normalize structure)
+    const normalizedImages = imageItems.map(item => ({
+        ...item,
+        snippet: {
+            title: item.title,
+            thumbnails: { high: { url: item.src } }
+        }
+    }));
 
-        sessionStorage.setItem('youtube_portfolio_data', JSON.stringify(fetchedVideosData));
-        currentFilteredVideos = fetchedVideosData;
-        displayPage(1);
-    } catch (error) {
-        console.error('Error fetching YouTube data:', error);
-        if (portfolioGrid) portfolioGrid.innerHTML = `<p>Error loading portfolio grid. Please check API key.</p>`;
-    }
+    // 4. Merge and Display
+    fetchedVideosData = [...fetchedYoutubeData, ...normalizedImages];
+
+    // Initial Filter (default to All)
+    currentFilteredVideos = fetchedVideosData;
+    displayPage(1);
 }
 
 function displayPage(page) {
     const portfolioGrid = document.querySelector('.portfolio-grid');
-    if (!portfolioGrid) return; 
+    if (!portfolioGrid) return;
 
     currentPage = page;
     portfolioGrid.innerHTML = '';
@@ -57,27 +103,51 @@ function displayPage(page) {
     setupPaginationControls();
 }
 
-function populatePortfolio(videos) {
+function populatePortfolio(items) {
     const portfolioGrid = document.querySelector('.portfolio-grid');
     if (!portfolioGrid) return;
-    
-    videos.forEach(video => {
-        const snippet = video.snippet;
-        const thumbnail = snippet.thumbnails.high; 
+
+    items.forEach(item => {
+        const snippet = item.snippet;
+        // Use high res thumbnail, fallback to hqdefault via onerror in img tag
+        const thumbnailUrl = snippet.thumbnails.high ? snippet.thumbnails.high.url : '';
+
         const portfolioItem = document.createElement('div');
         portfolioItem.className = 'portfolio-item';
-        portfolioItem.dataset.videoId = video.id;
-        portfolioItem.dataset.category = video.category;
-        portfolioItem.classList.add(thumbnail && thumbnail.width > thumbnail.height ? 'horizontal' : 'vertical');
+        portfolioItem.dataset.type = item.type; // 'youtube' or 'image'
+        portfolioItem.dataset.category = item.category;
 
-        portfolioItem.innerHTML = `
-            <img src="${thumbnail.url}" alt="${snippet.title}" class="thumbnail">
-            <div class="item-overlay"><h3>${snippet.title}</h3></div>
-            <div class="play-icon"></div>
-        `;
+        // Determine orientation
+        let orientationClass = 'horizontal';
+        if (snippet.thumbnails.high && snippet.thumbnails.high.width && snippet.thumbnails.high.height && snippet.thumbnails.high.width < snippet.thumbnails.high.height) {
+            orientationClass = 'vertical';
+        }
+        portfolioItem.classList.add(orientationClass);
+
+        if (item.type === 'youtube') {
+            portfolioItem.dataset.videoId = item.videoId;
+            portfolioItem.innerHTML = `
+                <img src="${thumbnailUrl}" alt="${snippet.title}" class="thumbnail" loading="lazy" onerror="this.src='https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg'">
+                <div class="item-overlay"><h3>${snippet.title}</h3></div>
+                <div class="play-icon"></div>
+            `;
+            // Click -> Play Video
+            portfolioItem.addEventListener('click', () => {
+                playVideoInPlace(portfolioItem, item.videoId);
+            });
+        } else if (item.type === 'image') {
+            portfolioItem.innerHTML = `
+                <img src="${thumbnailUrl}" alt="${snippet.title}" class="thumbnail" loading="lazy">
+                <div class="item-overlay"><h3>${snippet.title}</h3></div>
+            `;
+            // Click -> Open Lightbox
+            portfolioItem.addEventListener('click', () => {
+                openLightbox(thumbnailUrl);
+            });
+        }
+
         portfolioGrid.appendChild(portfolioItem);
     });
-    addPortfolioClickListeners();
 }
 
 function setupPaginationControls() {
@@ -85,42 +155,106 @@ function setupPaginationControls() {
     if (!paginationContainer) return;
 
     paginationContainer.innerHTML = '';
-    const pageCount = Math.ceil(currentFilteredVideos.length / getVideosPerPage());
-    if (pageCount <= 1) return;
+    const videosPerPage = getVideosPerPage();
+    const totalPages = Math.ceil(currentFilteredVideos.length / videosPerPage);
 
-    for (let i = 1; i <= pageCount; i++) {
-        const button = document.createElement('button');
-        button.className = 'pagination-btn';
-        if (i === currentPage) button.classList.add('active');
-        button.innerText = i;
-        button.addEventListener('click', () => displayPage(i));
-        paginationContainer.appendChild(button);
+    if (totalPages <= 1) return;
+
+    // Previous Button
+    const prevButton = document.createElement('button');
+    prevButton.innerHTML = '&#10094;'; // Left Arrow
+    prevButton.className = 'pagination-btn';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => displayPage(currentPage - 1));
+    paginationContainer.appendChild(prevButton);
+
+    // Page Indicator (e.g. "1 / 5")
+    const pageIndicator = document.createElement('span');
+    pageIndicator.textContent = `${currentPage} / ${totalPages}`;
+    pageIndicator.style.color = 'var(--text-color)';
+    pageIndicator.style.fontFamily = "'Montserrat', sans-serif";
+    pageIndicator.style.fontWeight = '700';
+    pageIndicator.style.margin = '0 15px';
+    paginationContainer.appendChild(pageIndicator);
+
+    // Next Button
+    const nextButton = document.createElement('button');
+    nextButton.innerHTML = '&#10095;'; // Right Arrow
+    nextButton.className = 'pagination-btn';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener('click', () => displayPage(currentPage + 1));
+    paginationContainer.appendChild(nextButton);
+}
+
+// --- LIGHTBOX FUNCTIONS ---
+function openLightbox(imageSrc) {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn = document.querySelector('.lightbox-close');
+
+    if (lightbox && lightboxImg) {
+        lightboxImg.src = imageSrc;
+        lightbox.classList.add('active');
+
+        // Close functions
+        const closeLightbox = () => {
+            lightbox.classList.remove('active');
+            lightboxImg.src = '';
+        };
+
+        if (closeBtn) closeBtn.onclick = closeLightbox;
+        lightbox.onclick = (e) => {
+            if (e.target === lightbox) closeLightbox();
+        };
+
+        document.onkeydown = (e) => {
+            if (e.key === "Escape") closeLightbox();
+        };
     }
 }
 
-function addPortfolioClickListeners(){
-    document.querySelectorAll('.portfolio-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const videoId = item.dataset.videoId;
-            playVideoInPlace(item, videoId);
-        });
-    });
-}
-
 function playVideoInPlace(element, videoId) {
+    // Disable hover effects/transforms which block fullscreen
+    element.classList.add('video-playing');
+
     element.innerHTML = `<div id="player-${videoId}"></div>`;
     new YT.Player(`player-${videoId}`, {
         height: '100%',
         width: '100%',
         videoId: videoId,
-        playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0 }
+        playerVars: {
+            'autoplay': 1,
+            'controls': 1,
+            'rel': 0,
+            'fs': 1,
+            'playsinline': 0
+        },
+        events: {
+            'onReady': (event) => {
+                const iframe = event.target.getIframe();
+                iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                iframe.allowFullscreen = true;
+            }
+        }
     });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     const loader = document.getElementById('loader');
-    if (loader) window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 2000));
+    if (loader) {
+        const hideLoader = () => setTimeout(() => loader.classList.add('hidden'), 2000);
+
+        // If the page is already loaded, hide immediately
+        if (document.readyState === 'complete') {
+            hideLoader();
+        } else {
+            // Otherwise wait for load
+            window.addEventListener('load', hideLoader);
+            // Backup safety timer (5 seconds max)
+            setTimeout(hideLoader, 5000);
+        }
+    }
 
     const cursorDot = document.querySelector('.cursor-dot');
     const cursorOutline = document.querySelector('.cursor-outline');
@@ -141,9 +275,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { threshold: [0.5] });
         navbarObserver.observe(heroSection);
     }
-    
+
     const bgVideoElement = document.getElementById('bg-video');
-    if(bgVideoElement) {
+    if (bgVideoElement) {
         const videoSources = ['assets/videos/bg1.mp4', 'assets/videos/bg2.mp4', 'assets/videos/bg3.mp4', 'assets/videos/bg4.mp4'];
         bgVideoElement.src = videoSources[Math.floor(Math.random() * videoSources.length)];
     }
@@ -166,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         setTimeout(type, 2500);
     }
-    
+
     const canvas = document.getElementById('blob-canvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
@@ -180,8 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const animateBlobs = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); blobs.forEach(b => { b.update(); b.draw(); }); requestAnimationFrame(animateBlobs); };
         animateBlobs();
         window.addEventListener('resize', () => {
-             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-             if (document.querySelector('.portfolio-grid')) displayPage(currentPage);
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            if (document.querySelector('.portfolio-grid')) displayPage(currentPage);
         });
     }
 
@@ -194,8 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { rootMargin: "-100px 0px" });
     document.querySelectorAll('section.hidden').forEach(el => sectionObserver.observe(el));
-    
-    // --- THIS IS THE MISSING CODE FOR SERVICE CARD ANIMATIONS ---
+
+    // Service Cards Tilt
     const serviceCards = document.querySelectorAll('.service-card');
     if (serviceCards.length > 0) {
         serviceCards.forEach(card => {
@@ -211,40 +345,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    loadPortfolioIntoIndex();
+    // Initialize Portfolio Logic
+    initializePortfolioScripts();
 });
 
-
-async function loadPortfolioIntoIndex() {
-    const placeholder = document.getElementById('portfolio-placeholder');
-    if (!placeholder) return;
-
-    try {
-        const response = await fetch('portfolio.html');
-        const htmlText = await response.text();
-        const parser = new DOMParser();
-        const portfolioDoc = parser.parseFromString(htmlText, 'text/html');
-        const portfolioSection = portfolioDoc.querySelector('#portfolio');
-
-        if (portfolioSection) {
-            placeholder.replaceWith(portfolioSection);
-            const newPortfolioSection = document.getElementById('portfolio');
-            const sectionObserver = new IntersectionObserver(entries => {
-                if (entries[0].isIntersecting) {
-                    newPortfolioSection.classList.add('visible');
-                    sectionObserver.unobserve(newPortfolioSection);
-                }
-            }, { rootMargin: "-100px 0px" });
-            sectionObserver.observe(newPortfolioSection);
-
-            initializePortfolioScripts();
-        }
-    } catch (error) {
-        console.error("Error loading portfolio content:", error);
-    }
-}
-
 function initializePortfolioScripts() {
+    // 1. Showreel Logic
     const showreelVideo = document.getElementById('showreel-video');
     const playOverlay = document.getElementById('showreel-play-overlay');
 
@@ -272,20 +378,34 @@ function initializePortfolioScripts() {
         });
     }
 
-    // Initialize YouTube API for the portfolio grid below
-    if (typeof onYouTubeIframeAPIReady === 'function') {
-        onYouTubeIframeAPIReady();
-    }
+    // 2. Clear previous state if any to avoid duplicates
+    fetchedVideosData = [];
+    currentFilteredVideos = [];
 
-    // Attach listeners for filter buttons
+    // 3. Initialize Grid & Data
+    fetchYouTubeVideos();
+
+    // 4. Attach Filter Listeners
     const filterButtons = document.querySelectorAll('.filter-btn');
+    // console.warn("No filter buttons found!");
+
     filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            currentFilteredVideos = (button.dataset.filter === 'all')
+        // Remove old listeners by cloning
+        const newBtn = button.cloneNode(true);
+        button.parentNode.replaceChild(newBtn, button);
+
+        newBtn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            newBtn.classList.add('active');
+
+            const filter = newBtn.dataset.filter;
+            currentPage = 1; // Reset to page 1 on filter
+            currentFilteredVideos = (filter === 'all')
                 ? fetchedVideosData
-                : fetchedVideosData.filter(video => video.category === button.dataset.filter);
+                : fetchedVideosData.filter(video => video.category === filter);
+
+            // console.log(`Filter: ${filter}, Items found: ${currentFilteredVideos.length}`);
+
             displayPage(1);
         });
     });
