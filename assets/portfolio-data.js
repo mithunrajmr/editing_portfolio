@@ -3,8 +3,11 @@
 const portfolioData = [
     // --- VIDEOS ---
     // --- VIDEOS ---
-    { type: 'youtube', videoId: "YOTi8j9zBx4", category: "reels", title: "KIA HinM" },
+    { type: 'youtube', videoId: "ZOSWAdmiJx8", category: "highlights", title: "Ayush sapra main channel video" },
+    { type: 'youtube', videoId: "mZ30M3HCz3M", category: "highlights", title: "Creat an influence" },
     { type: 'youtube', videoId: "IZuJSF3SxdY", category: "reels", title: "HinM instagram" },
+    { type: 'youtube', videoId: "YOTi8j9zBx4", category: "reels", title: "KIA HinM" },
+    { type: 'youtube', videoId: "93Qmut_JfmE", category: "highlights", title: "Arpitha Profile" },
     { type: 'youtube', videoId: "bHgEHmMvZSo", category: "reels", title: "Cinematic Cut" },
     { type: 'youtube', videoId: "lXaBUPf62N8", category: "reels", title: "Dynamic Reel" },
     { type: 'youtube', videoId: "pgG-whIbYs8", category: "reels", title: "Short & Snappy" },
@@ -13,9 +16,7 @@ const portfolioData = [
     { type: 'youtube', videoId: "aTXR33mb_LA", category: "highlights", title: "Stream Highlights" },
     { type: 'youtube', videoId: "L_yUtcL3AGA", category: "highlights", title: "Event Recap" },
     { type: 'youtube', videoId: "zcziWhA9ecw", category: "gameplay", title: "Walkthrough" },
-    { type: 'youtube', videoId: "mZ30M3HCz3M", category: "highlights", title: "Walkthrough" },
     { type: 'youtube', videoId: "Kk066lRWnmw", category: "highlights", title: "Profile Presentation" },
-    { type: 'youtube', videoId: "93Qmut_JfmE", category: "highlights", title: "Profile Presentation" },
     { type: 'youtube', videoId: "f3htS5-Fwhc", category: "highlights", title: "Profile Presentation" },
 
     // --- DESIGNS (Images) ---
